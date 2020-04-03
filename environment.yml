@@ -1,0 +1,5 @@
+name: ooregex
+dependencies:
+  - python=3.8
+  - pytest
+  - coverage

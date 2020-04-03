@@ -7,19 +7,22 @@ from any_in_group import Digit
 @pytest.mark.parametrize(
     "match, result",
     [
+        ["0", False],
         ["1", True],
+        ["3", True],
+        ["6", True],
         ["9", True],
         ["03", True],
         ["11", True],
         ["12", True],
         ["15", False],
         ["001", False],
-        ["021", False],
+        ["010", False],
     ],
 )
 def test_month(match, result):
     oore = (
-        OORegex().contains(Group(Unforced("0") + Digit(max=12), name="month")).regex()
+        OORegex().contains(Group(Unforced("0") + Digit(min=1, max=12), name="month")).regex()
     )
     assert (oore.fullmatch(match) is not None) == result
 

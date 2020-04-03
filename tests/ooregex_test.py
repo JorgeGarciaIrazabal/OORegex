@@ -1,7 +1,7 @@
 import pytest
 
 from OORegex import Quantifier, Group
-from any_in_group import Digit
+from any_in_group import Digit, Punctuation
 
 
 @pytest.mark.parametrize(
@@ -35,6 +35,7 @@ def test_group_matches_result(word, matches, groups_count):
 @pytest.mark.parametrize(
     "min, max, matches,not_matches",
     [
+        [None, None, [0, 2, 3, 1], [58, 12, 22]],
         [0, 3, [0, 2, 3], [5, 12, 22]],
         [0, 34, [4, 12, 22, 31], [38, 55, -3]],
         [0, 123, [4, 12, 22, 122], [-38, 1929, -3, 149, 500]],
@@ -46,3 +47,16 @@ def test_digit_matches_result(min, max, matches, not_matches):
         assert q.regex().fullmatch(str(match)) is not None
     for not_match in not_matches:
         assert not q.regex().fullmatch(str(not_match))
+
+
+@pytest.mark.parametrize(
+    "match, result",
+    [
+        [".", True],
+        ["-", True],
+        ["a", False],
+    ],
+)
+def test_punctuation_matches_result(match, result):
+    q = Punctuation()
+    assert (q.regex().fullmatch(str(match)) is not None) == result

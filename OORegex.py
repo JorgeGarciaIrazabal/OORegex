@@ -20,10 +20,13 @@ class OORegexBase:
         return OORegexBase(f"{self}|{other_value}")
 
     def __add__(self, other):
-        return OORegexBase(f"{self}{other}")
+        return OORegexBase(f"({self})({other})")
 
     def __and__(self, other):
         return self + other
+
+    def __neg__(self):
+        return OORegex(f"(?!{self.value})")
 
     def regex(self) -> Pattern:
         return re.compile(self.build())
@@ -50,7 +53,7 @@ class Group(OORegexBase):
 @dataclass
 class Quantifier(OORegexBase):
     min: int = 0
-    max: int = -1
+    max: int = 1
 
     def build(self) -> str:
         assert self.min >= 0
@@ -102,5 +105,5 @@ class OORegex(OORegexBase):
         for elem in self._contain_elements:
             build_str += str(elem)
         if self._ends_with is not None:
-            build_str += f"^{self._ends_with}$"
+            build_str += f"{self._ends_with}$"
         return build_str
