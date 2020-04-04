@@ -1,59 +1,56 @@
 from dataclasses import dataclass
 
-from OORegex import OORegexBase, OOValue, Str
+from OORegex import OORegexBase, OORValue, R
 from typing import Tuple, Optional
 import string
 
 
-@dataclass
 class AnyIn(OORegexBase):
-    value: OOValue = None
-
-    def __init__(self, value):
-        assert value is not None
-        self.value = value
+    _D_value: OORValue = None
 
     def build(self) -> str:
-        return f"[{self.value}]"
+        return f"[{self._value}]"
 
     def __neg__(self):
-        return f"[^{self.value}]"
+        return f"[^{self._value}]"
 
 
-@dataclass
 class AnyChar(OORegexBase):
-    value: OOValue = "."
+    _D_value: OORValue = "."
 
 
-@dataclass
 class LettersAndDigits(AnyIn):
-    value: OOValue = "a-zA-Z0-9"
+    _D_value: OORValue = "a-zA-Z0-9"
 
 
-@dataclass
 class Letters(OORegexBase):
-    value: OOValue = "a-zA-Z"
+    _D_value: OORValue = "a-zA-Z"
 
 
-@dataclass
-class Digit(OORegexBase):
-    value: OOValue = r"\d"
-    max: Optional[int] = None
-    min: Optional[int] = None
+class Digit(R):
+    def __init__(
+        self,
+        min: Optional[int] = None,
+        max: Optional[int] = None,
+        **kwargs
+    ):
+        self._min = min
+        self._max = max
+        super().__init__(**kwargs)
 
     def build(self) -> str:
-        if self.max is not None:
-            q = self._build_range(self.max)
-            if self.min:
-                q = f"(?!{self._build_range(self.min-1)})" + q
-            self.value = q
+        if self._max is not None:
+            q = self._build_range(self._max)
+            if self._min:
+                q = f"(?!{self._build_range(self._min - 1)})" + q
+            self._D_value = q
         return super().build()
 
     def _build_range(self, number):
         if number == 0:
             return "0"
         number_str = str(number)
-        final_build = Str()
+        final_build = R()
 
         for i in range(1, len(number_str)):
             final_build |= "[1-9]" + "[0-9]" * (i - 1)
@@ -69,66 +66,55 @@ class Digit(OORegexBase):
             else:
                 final_build |= build_str
 
-        final_build |= Str(number_str)
+        final_build |= R(number_str)
         return final_build.build()
 
 
-@dataclass
 class Unicode(OORegexBase):
-    value: OOValue = r"\X"
+    _D_value: OORValue = r"\X"
 
 
-@dataclass
 class NewLine(OORegexBase):
-    value: OOValue = r"\R"
+    _D_value: OORValue = r"\R"
 
 
-@dataclass
 class VerticalWhitespace(OORegexBase):
-    value: OOValue = r"\v"
+    _D_value: OORValue = r"\v"
 
 
-@dataclass
 class HorizontalWhitespace(OORegexBase):
-    value: OOValue = r"\h"
+    _D_value: OORValue = r"\h"
 
 
-@dataclass
 class Blank(OORegexBase):
-    value: OOValue = "[:blank:]"
+    _D_value: OORValue = "[:blank:]"
 
     def __neg__(self):
         return Visible()
 
 
-@dataclass
 class Control(OORegexBase):
-    value: OOValue = "[:cntrl:]"
+    _D_value: OORValue = "[:cntrl:]"
 
 
-@dataclass
 class Visible(OORegexBase):
-    value: OOValue = "[:print:]"
+    _D_value: OORValue = "[:print:]"
 
     def __neg__(self):
         return Blank()
 
 
-@dataclass
 class Punctuation(OORegexBase):
-    value: OOValue = f"[{string.punctuation}]"
+    _D_value: OORValue = f"[{string.punctuation}]"
 
 
-@dataclass
 class WhiteSpace(OORegexBase):
-    value: OOValue = r"\s"
+    _D_value: OORValue = r"\s"
 
 
-@dataclass
 class Word(OORegexBase):
-    value: OOValue = r"\w"
+    _D_value: OORValue = r"\w"
 
 
-@dataclass
 class Hexadecimal(OORegexBase):
-    value: OOValue = "[:xdigit:]"
+    _D_value: OORValue = "[:xdigit:]"

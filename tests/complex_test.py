@@ -1,6 +1,6 @@
 import pytest
 
-from OORegex import Quantifier, Group, OORegex, Unforced, Str
+from OORegex import Group, OORegex, Unforced
 from any_in_group import Digit
 
 
@@ -25,6 +25,11 @@ def test_month(match, result):
         OORegex().contains(Group(Unforced("0") + Digit(min=1, max=12), name="month")).regex()
     )
     assert (oore.fullmatch(match) is not None) == result
+
+
+def test_group_and_multi_number():
+    d = Digit(min=1, max=3, min_occurrences=2)
+    d.build()
 
 
 @pytest.mark.parametrize(
