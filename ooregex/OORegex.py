@@ -25,7 +25,21 @@ class OORegexBase:
         return OORegexBase(f"{self}|{other_value}")
 
     def __add__(self, other):
-        return OORegexBase(f"({self})({other})")
+        self_s = (
+            self
+            if str(self).strip("^$").startswith("(")
+            and str(self).strip("^$").endswith(")")
+            or str(self) == ""
+            else f"({self})"
+        )
+        other_s = (
+            other
+            if str(other).strip("^$").startswith("(")
+            and str(other).strip("^$").endswith(")")
+            or str(other) == ""
+            else f"({other})"
+        )
+        return OORegexBase(f"{self_s}{other_s}")
 
     def __and__(self, other):
         return self + other
@@ -58,7 +72,9 @@ class R(OORegexBase):
         composed_value = str(self._value)
         if self._max_occurrences is not None or self._min_occurrences is not None:
             composed_value = Quantifier(
-                value=composed_value, min=self._min_occurrences, max=self._max_occurrences
+                value=composed_value,
+                min=self._min_occurrences,
+                max=self._max_occurrences,
             ).build()
         if self._group is not None:
             composed_value = Group(value=composed_value, name=self._group).build()
@@ -141,14 +157,14 @@ class OORegex:
         return self
 
     def build(self):
-        build_str = ""
+        build_str = R()
         if self._starts_with is not None:
             build_str += f"^{self._starts_with}"
         for elem in self._contain_elements:
-            build_str += str(elem)
+            build_str += elem
         if self._ends_with is not None:
             build_str += f"{self._ends_with}$"
-        return build_str
+        return str(build_str)
 
     def regex(self) -> Pattern:
         return re.compile(self.build())

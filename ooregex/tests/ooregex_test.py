@@ -1,7 +1,6 @@
 import pytest
 
-from OORegex import Quantifier, Group, unlimited, R
-from any_in_group import Digit, Punctuation
+from ooregex import Digit, Group, Punctuation, R, unlimited
 
 
 @pytest.mark.parametrize(
@@ -50,6 +49,8 @@ def test_named_group(word, matches, result):
     [
         [None, None, [0, 2, 3, 1], [58, 12, 22]],
         [0, 3, [0, 2, 3], [5, 12, 22]],
+        [0, 30, [0, 2, 25, 30], [31, 50, 120]],
+        [1, 300, [123, 300, 30], [0, 301, 0]],
         [0, 34, [4, 12, 22, 31], [38, 55, -3]],
         [0, 123, [4, 12, 22, 122], [-38, 1929, -3, 149, 500]],
         [5, 8, [5, 8, 6], [4, -6, 9, 11]],
@@ -61,6 +62,23 @@ def test_digit_matches_result(min: int, max: int, matches, not_matches):
         assert q.regex().fullmatch(str(match)) is not None
     for not_match in not_matches:
         assert not q.regex().fullmatch(str(not_match))
+
+
+@pytest.mark.parametrize(
+    "min, max, leading_zeros, matches,not_matches",
+    [
+        [5, 34, 1, ["06", "6", "30", "34"], ["012", "0", "410"]],
+        [1, 300, 2, ["011", "30", "300"], ["0123", "0", "410"]]
+    ],
+)
+def test_digit_matches_result_with_leading_zeros(
+    min: int, max: int, leading_zeros: int, matches, not_matches
+):
+    q = Digit(min=min, max=max, optional_zfill=True)
+    for match in matches:
+        assert q.regex().fullmatch(match) is not None
+    for not_match in not_matches:
+        assert not q.regex().fullmatch(not_match)
 
 
 @pytest.mark.parametrize("match, result", [[".", True], ["-", True], ["a", False]])

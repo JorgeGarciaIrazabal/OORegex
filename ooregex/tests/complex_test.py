@@ -1,7 +1,7 @@
 import pytest
 
-from OORegex import Group, OORegex, Unforced
-from any_in_group import Digit
+from ooregex import Group
+from ooregex import Digit
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ def test_month(match, result):
     ],
 )
 def test_month_with_optional_0(match, result):
-    oore = Digit(min=1, max=12, leading_zeros=1, optional_leading_zeros=True).regex()
+    oore = Digit(min=1, max=12, optional_zfill=True).regex()
     assert (oore.fullmatch(match) is not None) == result
 
 
