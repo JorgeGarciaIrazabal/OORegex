@@ -55,13 +55,14 @@ class R(OORegexBase):
         self._group = group or self._D_group
 
     def build(self) -> str:
+        composed_value = str(self._value)
         if self._max_occurrences is not None or self._min_occurrences is not None:
-            self._value = Quantifier(
-                value=self._value, min=self._min_occurrences, max=self._max_occurrences
+            composed_value = Quantifier(
+                value=composed_value, min=self._min_occurrences, max=self._max_occurrences
             ).build()
         if self._group is not None:
-            self._value = Group(value=self._value, name=self._group).build()
-        return super().build()
+            composed_value = Group(value=composed_value, name=self._group).build()
+        return str(composed_value)
 
 
 class Group(OORegexBase):
@@ -98,13 +99,15 @@ class Quantifier(OORegexBase):
     def build(self) -> str:
         assert self._min >= 0
         assert self._min <= self._max
-        max_occurrences = "" if self._max == unlimited else self._max
+        max = "" if self._max == unlimited else self._max
         value = (
             self._value
             if isinstance(self._value, OORegexBase) or len(self._value) == 1
             else Group(self._value)
         )
-        return f"{value}{{{self._min},{max_occurrences}}}"
+        if max == self._min:
+            return f"{value}{{{self._min}}}"
+        return f"{value}{{{self._min},{max}}}"
 
 
 class Unforced(Quantifier):

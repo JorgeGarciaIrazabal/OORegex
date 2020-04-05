@@ -28,14 +28,20 @@ class Letters(OORegexBase):
 
 
 class Digit(R):
+    _D_value: OORValue = r"\d"
+
     def __init__(
         self,
         min: Optional[int] = None,
         max: Optional[int] = None,
-        **kwargs
+        leading_zeros: int = 0,
+        optional_leading_zeros: bool = False,
+        **kwargs,
     ):
         self._min = min
         self._max = max
+        self._leading_zeros = leading_zeros
+        self._optional_leading_zeros = optional_leading_zeros
         super().__init__(**kwargs)
 
     def build(self) -> str:
@@ -43,7 +49,9 @@ class Digit(R):
             q = self._build_range(self._max)
             if self._min:
                 q = f"(?!{self._build_range(self._min - 1)})" + q
-            self._D_value = q
+            self._value = q
+        else:
+            self._value = self._D_value
         return super().build()
 
     def _build_range(self, number):
@@ -51,9 +59,6 @@ class Digit(R):
             return "0"
         number_str = str(number)
         final_build = R()
-
-        for i in range(1, len(number_str)):
-            final_build |= "[1-9]" + "[0-9]" * (i - 1)
         for i, di in enumerate(number_str):
             build_str = number_str[:i]
             for j, dj in enumerate(number_str[i:]):
@@ -67,7 +72,24 @@ class Digit(R):
                 final_build |= build_str
 
         final_build |= R(number_str)
+        final_build = self._add_leading_zeros(final_build, number_str)
         return final_build.build()
+
+    def _add_leading_zeros(self, final_build, number_str):
+        for i in range(1, len(number_str)):
+            if self._leading_zeros > 0:
+                l_zeros = self._leading_zeros - i + 1
+                r_l_zeros = str(
+                    R(
+                        "0",
+                        min_occurrences=0 if self._optional_leading_zeros else l_zeros,
+                        max_occurrences=l_zeros,
+                    )
+                )
+            else:
+                r_l_zeros = ""
+            final_build |= r_l_zeros + "[1-9]" + "[0-9]" * (i - 1)
+        return final_build
 
 
 class Unicode(OORegexBase):

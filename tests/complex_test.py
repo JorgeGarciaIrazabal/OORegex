@@ -12,18 +12,34 @@ from any_in_group import Digit
         ["3", True],
         ["6", True],
         ["9", True],
-        ["03", True],
         ["11", True],
         ["12", True],
+        ["02", False],
         ["15", False],
         ["001", False],
-        ["010", False],
     ],
 )
 def test_month(match, result):
-    oore = (
-        OORegex().contains(Group(Unforced("0") + Digit(min=1, max=12), name="month")).regex()
-    )
+    d = Digit(min=1, max=12, group="month").regex()
+    assert (d.fullmatch(match) is not None) == result
+
+
+@pytest.mark.parametrize(
+    "match, result",
+    [
+        ["0", False],
+        ["3", True],
+        ["01", True],
+        ["05", True],
+        ["11", True],
+        ["12", True],
+        ["012", False],
+        ["15", False],
+        ["001", False],
+    ],
+)
+def test_month_with_optional_0(match, result):
+    oore = Digit(min=1, max=12, leading_zeros=1, optional_leading_zeros=True).regex()
     assert (oore.fullmatch(match) is not None) == result
 
 
